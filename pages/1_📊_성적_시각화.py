@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import plotly.express as px
 import streamlit as st
 
@@ -8,22 +6,18 @@ from student_data import CATEGORIES, LABELS, SCORES, descriptive_stats, load_stu
 st.set_page_config(page_title="학생 성적 시각화", page_icon="📊", layout="wide")
 st.title("📊 학생 성적 시각화")
 st.write("StudentsPerformance CSV를 업로드하여 과목별 성적과 학생 배경을 탐색하세요.")
-sample = Path(__file__).resolve().parents[1] / "StudentsPerformance.csv"
-if sample.exists():
-    st.download_button("실습용 CSV 다운로드", sample.read_bytes(), "StudentsPerformance.csv", "text/csv")
 uploaded = st.file_uploader("StudentsPerformance.csv 업로드", type=["csv"])
-use_sample = st.checkbox("제공된 예제 데이터 사용", value=False) if sample.exists() else False
 with st.expander("CSV 인코딩 설정"):
     encoding = st.selectbox("문자 인코딩", ["자동", "utf-8-sig", "cp949", "euc-kr"])
-if uploaded is None and not use_sample:
-    st.info("CSV를 업로드하거나 예제 데이터 사용을 선택해 주세요.")
+if uploaded is None:
+    st.info("분석을 시작하려면 CSV 파일을 업로드해 주세요.")
     st.stop()
 try:
-    data = load_students(uploaded.getvalue() if uploaded is not None else sample.read_bytes(), encoding)
+    data = load_students(uploaded.getvalue(), encoding)
 except ValueError as exc:
     st.error(str(exc))
     st.stop()
-st.caption(f"분석 파일: {uploaded.name if uploaded is not None else sample.name}")
+st.caption(f"분석 파일: {uploaded.name}")
 
 st.sidebar.header("분석 조건")
 selected = st.sidebar.multiselect("분석 과목", SCORES, default=SCORES, format_func=lambda col: LABELS[col])
